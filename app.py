@@ -1,52 +1,36 @@
+from __future__ import division, print_function
 
+import numpy as np
+import pandas as pd
+#import joblib as joblib
 
-# This is basically the heart of my flask 
-
-
-from flask import Flask, render_template, request, redirect, url_for, jsonify
-import pickle
+# Flask utils
+from flask import Flask, redirect, url_for, request, render_template, jsonify
 from model import Recommendation
 
 recommend = Recommendation()
-app = Flask(__name__)  # intitialize the flaks app  # common 
+app = Flask(__name__)  # intitialize the flaks app  # common
 
 import os
 from flask import send_from_directory
 
-
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static'),
-                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
-@app.route('/', methods = ['POST', 'GET'])
+@app.route('/')
 def home():
-    flag = False 
+    return render_template('index.html')
+
+@app.route("/", methods=['POST'])
+def home():
+    flag = False
     data = ""
     if request.method == 'POST':
         flag = True
         user = request.form["userid"]
         data=recommend.getTopProducts(user)
-    return render_template('index.html', data=data, flag=flag)
+        return render_template('index.html', data=data, flag=flag)
+    else:
+        return render_template('index.html')
 
-@app.route('/userList', methods = ['GET'])
-def userList():
-    data=recommend.getUsers()
-    return data
-
-@app.route('/productList', methods = ['GET'])
-def productList():
-    user=request.args.get("userid")
-    data=recommend.getTopProductsNew(user)
-    return data
-
-@app.route('/analysText', methods = ['GET'])
-def analysText():
-    text=request.args.get("text")
-    data=recommend.analyiseSentiment(text)
-    return data
-
-if __name__ == '__main__' :
-    app.run(debug=True )  
-    
-    #,host="0.0.0.0")
+if __name__ == '__main__':
+    #app.run(host='0.0.0.0', port=5000)
+    app.debug=True
+    app.run()
